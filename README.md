@@ -6,6 +6,13 @@ When an enemy hits you, the mod intercepts the damage, blocks it, and triggers t
 
 > Requires [REFramework](https://www.nexusmods.com/monsterhunterwilds/mods/93).
 
+
+## Showcase ( **Works with unequiped weapon also!** )
+
+
+[![Watch the video](https://youtu.be/CrHF1qwJr9U)](https://youtu.be/CrHF1qwJr9U)
+
+
 ---
 
 ## Installation
