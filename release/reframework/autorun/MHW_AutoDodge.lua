@@ -1,9 +1,10 @@
 -- MHW_AutoDodge.lua
 -- Auto Perfect Dodge (Bow) and Auto Perfect Guard (HBG) for Monster Hunter Wilds.
 --
--- Perfect dodge requires both controllers:
---   BASE Cat=2 Idx=33  (dodge animation)
---   SUB  Cat=1 Idx=1   (perfect dodge marker — triggers flash / time-slow)
+-- BOW:  hooks evHit_Damage PRE + SKIP_ORIGINAL, queues Cat=2 Idx=9 (dodge start).
+--       Secondary evHit_DamagePreProcess calls then upgrade to Cat=2 Idx=33 + SUB Cat=1 Idx=1.
+--
+-- HBG:  hooks evHit_Damage + SKIP_ORIGINAL (confirmed working, unchanged).
 
 local CONFIG_PATH = "MHW_AutoDodge.json"
 local BOW         = 11
@@ -13,18 +14,14 @@ local COOLDOWN    = 0.3
 local ACTION_ID_TD = sdk.find_type_definition("ace.ACTION_ID")
 local HUNTER_TD    = sdk.find_type_definition("app.HunterCharacter")
 
-local character      = nil
-local weaponType     = -1
-local lastHitAt      = 0
--- Bow perfect dodge: 3-step sequence spread across frames
--- 0 = idle, 1 = send BASE(2,33) next frame, 2 = send SUB(1,1) frame after
-local dodgeStep = 0
+local character  = nil
+local weaponType = -1
+local lastHitAt  = 0
 
 local function defaultConfig()
     return {
         enabled      = true,
         evadeEnabled = true,
-        evadeIframes = 0.5,
         guardEnabled = true,
         guardIframes = 0.25,
         bypassChecks = true,
@@ -48,7 +45,6 @@ end
 
 loadConfig()
 
--- Send changeActionRequest on the given controller object
 local function sendAction(ctrl, cat, idx)
     if not ctrl then return end
     if ACTION_ID_TD then
@@ -69,25 +65,9 @@ local function triggerAction(cat, idx)
     if ok and ctrl then sendAction(ctrl, cat, idx) end
 end
 
-local function triggerSubAction(cat, idx)
-    if not character then return end
-    local ok, ctrl = pcall(function() return character:call("get_SubActionController") end)
-    if ok and ctrl then sendAction(ctrl, cat, idx) end
-end
-
 local function triggerHBGGuard()
     pcall(function() character:call("startNoHitTimer(System.Single)", cfg.guardIframes) end)
     triggerAction(1, 146)
-end
-
-local function triggerBowPerfectDodge()
-    -- iframes only (no beginDodgeNoHit — we control the action sequence manually)
-    pcall(function() character:call("startNoHitTimer(System.Single)", cfg.evadeIframes) end)
-    -- Step 1: BASE(2,10) initial aimed dodge + SUB(0,0) reset
-    triggerAction(2, 10)
-    triggerSubAction(0, 0)
-    -- Steps 2+3 deferred via BeginRendering
-    dodgeStep = 1
 end
 
 re.on_pre_application_entry('BeginRendering', function()
@@ -106,16 +86,6 @@ re.on_pre_application_entry('BeginRendering', function()
         character  = nil
         weaponType = -1
     end
-
-    -- Step 2: BASE(2,33) perfect upgrade
-    if dodgeStep == 1 then
-        dodgeStep = 2
-        triggerAction(2, 33)
-    -- Step 3: SUB(1,1) perfect marker (same frame as natural sequence)
-    elseif dodgeStep == 2 then
-        dodgeStep = 0
-        triggerSubAction(1, 1)
-    end
 end)
 
 local hitMethod = HUNTER_TD and HUNTER_TD:get_method('evHit_Damage')
@@ -126,47 +96,28 @@ if hitMethod then
             if not cfg.enabled then return end
 
             local now = os.clock()
-            if (now - lastHitAt) < COOLDOWN then return end
+            if now - lastHitAt < COOLDOWN then return end
 
             if not cfg.bypassChecks then
                 if not character then return end
-
                 local mine = false
                 pcall(function() mine = sdk.to_managed_object(args[1]) == character end)
                 if not mine then
                     pcall(function() mine = sdk.to_managed_object(args[2]) == character end)
                 end
                 if not mine then return end
-
-                local enemy = false
-                for _, i in ipairs({2, 3}) do
-                    if enemy then break end
-                    pcall(function()
-                        local info = sdk.to_managed_object(args[i])
-                        if not info then return end
-                        local owner = info:get_AttackOwner()
-                        if not owner then return end
-                        local name = owner:get_name()
-                        if name then
-                            enemy = name:find("Em", 1, true) ~= nil
-                                 or name:find("Gm", 1, true) ~= nil
-                        end
-                    end)
-                end
-                if not enemy then return end
             end
 
             lastHitAt = now
 
             if cfg.guardEnabled and weaponType == HBG then
                 triggerHBGGuard()
-            elseif cfg.evadeEnabled and (weaponType == BOW or weaponType == HBG) then
-                triggerBowPerfectDodge()
-            else
-                return
+                return sdk.PreHookResult.SKIP_ORIGINAL
+            elseif cfg.evadeEnabled and weaponType == BOW then
+                -- Cat=2 Idx=9 (dodge start) → secondary PreProcess hits → Cat=2 Idx=33 + SUB 1,1
+                triggerAction(2, 9)
+                return sdk.PreHookResult.SKIP_ORIGINAL
             end
-
-            return sdk.PreHookResult.SKIP_ORIGINAL
         end,
         function(retval) return retval end
     )
@@ -203,10 +154,6 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.evadeEnabled = imgui.checkbox('Active##evade', cfg.evadeEnabled)
     changed = changed or c
-    imgui.begin_disabled(not cfg.evadeEnabled)
-    c, cfg.evadeIframes = imgui.slider_float('IFrames (s)##evade', cfg.evadeIframes, 0.1, 2.0)
-    changed = changed or c
-    imgui.end_disabled()
     imgui.unindent(16)
 
     imgui.spacing()
