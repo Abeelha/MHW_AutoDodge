@@ -2,6 +2,9 @@
 
 Auto **Perfect Dodge** (Bow) and Auto **Perfect Guard** (HBG) for **Monster Hunter Wilds**.
 
+
+---
+
 When an enemy hits you, the mod intercepts the damage, blocks it, and triggers the correct defensive animation automatically.
 
 > Requires [REFramework](https://www.nexusmods.com/monsterhunterwilds/mods/93).
@@ -12,6 +15,18 @@ When an enemy hits you, the mod intercepts the damage, blocks it, and triggers t
 
 [![Watch the video](https://youtu.be/CrHF1qwJr9U)](https://youtu.be/CrHF1qwJr9U)
 
+
+---
+
+## Donation
+
+If this helped u, consider buying me a coffee :D
+
+```
+Bitcoin  (BTC)  bc1qk5jlu7hk05uvfpt33pgeaf78lzvnkgjyur8q04
+Ethereum (ETH)  0xd8834fc5330896405EC1A5db4bE997093E0408A7
+USDC     (ETH)  0xd8834fc5330896405EC1A5db4bE997093E0408A7
+```
 
 ---
 
