@@ -11,6 +11,8 @@
 -- HBG:  startNoHitTimer + queues Cat=1 Idx=146 (perfect guard).
 --
 -- GS:   startNoHitTimer + queues Cat=1 Idx=146 (perfect guard, same action ID as HBG).
+--
+-- Mount detection: character:call("get_IsPorterRiding") == true → skip hook entirely.
 
 local CONFIG_PATH = "MHW_AutoDodge.json"
 local GS          = 0
@@ -21,9 +23,10 @@ local LBG         = 13
 local ACTION_ID_TD = sdk.find_type_definition("ace.ACTION_ID")
 local HUNTER_TD    = sdk.find_type_definition("app.HunterCharacter")
 
-local character  = nil
-local weaponType = -1
-local lastHitAt  = 0
+local character     = nil
+local weaponType    = -1
+local isPorterRiding = false
+local lastHitAt     = 0
 
 local function defaultConfig()
     return {
@@ -37,11 +40,9 @@ local function defaultConfig()
         lbgCooldown   = 0.3,
         -- HBG
         guardEnabled  = true,
-        guardIframes  = 0.25,
         hbgCooldown   = 0.3,
         -- GS
         gsEnabled     = true,
-        gsIframes     = 0.25,
         gsCooldown    = 0.3,
         -- Misc
         bypassChecks  = true,
@@ -85,8 +86,8 @@ local function triggerAction(cat, idx)
     if ok and ctrl then sendAction(ctrl, cat, idx) end
 end
 
-local function triggerGuard(iframes)
-    pcall(function() character:call("startNoHitTimer(System.Single)", iframes) end)
+local function triggerGuard()
+    pcall(function() character:call("startNoHitTimer(System.Single)", 0.25) end)
     triggerAction(1, 146)
 end
 
@@ -102,9 +103,12 @@ re.on_pre_application_entry('BeginRendering', function()
         character = char
         local wok, wt = pcall(function() return char:get_WeaponType() end)
         weaponType = wok and wt or -1
+        local rok, rv = pcall(function() return char:call("get_IsPorterRiding") end)
+        isPorterRiding = rok and rv == true
     else
-        character  = nil
-        weaponType = -1
+        character      = nil
+        weaponType     = -1
+        isPorterRiding = false
     end
 end)
 
@@ -114,6 +118,7 @@ if hitMethod then
     sdk.hook(hitMethod,
         function(args)
             if not cfg.enabled then return end
+            if isPorterRiding then return end
 
             local now = os.clock()
             local cd  = cfg.universalCooldown
@@ -137,10 +142,10 @@ if hitMethod then
             lastHitAt = now
 
             if cfg.guardEnabled and weaponType == HBG then
-                triggerGuard(cfg.guardIframes)
+                triggerGuard()
                 return sdk.PreHookResult.SKIP_ORIGINAL
             elseif cfg.gsEnabled and weaponType == GS then
-                triggerGuard(cfg.gsIframes)
+                triggerGuard()
                 return sdk.PreHookResult.SKIP_ORIGINAL
             elseif cfg.evadeEnabled and weaponType == BOW then
                 triggerAction(2, 9)
@@ -186,7 +191,6 @@ re.on_draw_ui(function()
     imgui.separator()
     imgui.spacing()
 
-    -- Universal cooldown — drives all weapon sliders simultaneously
     imgui.text('Universal Cooldown')
     imgui.indent(16)
     c, cfg.universalCooldown = imgui.slider_float('All weapons##uni', cfg.universalCooldown, 0.05, 2.0)
@@ -232,12 +236,8 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.guardEnabled = imgui.checkbox('Active##guard', cfg.guardEnabled)
     changed = changed or c
-    imgui.begin_disabled(not cfg.guardEnabled)
-    c, cfg.guardIframes = imgui.slider_float('IFrames (s)##hbg', cfg.guardIframes, 0.1, 2.0)
-    changed = changed or c
     c, cfg.hbgCooldown = imgui.slider_float('Cooldown (s)##hbg', cfg.hbgCooldown, 0.05, 2.0)
     changed = changed or c
-    imgui.end_disabled()
     imgui.unindent(16)
 
     imgui.spacing()
@@ -247,12 +247,8 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.gsEnabled = imgui.checkbox('Active##gs', cfg.gsEnabled)
     changed = changed or c
-    imgui.begin_disabled(not cfg.gsEnabled)
-    c, cfg.gsIframes = imgui.slider_float('IFrames (s)##gs', cfg.gsIframes, 0.1, 2.0)
-    changed = changed or c
     c, cfg.gsCooldown = imgui.slider_float('Cooldown (s)##gs', cfg.gsCooldown, 0.05, 2.0)
     changed = changed or c
-    imgui.end_disabled()
     imgui.unindent(16)
 
     imgui.end_disabled()
@@ -266,8 +262,8 @@ re.on_draw_ui(function()
 
     imgui.spacing()
     imgui.text_colored(
-        string.format('Weapon: %d  (%s)', weaponType, weaponName()),
-        0xFFAAAAAA)
+        string.format('Weapon: %d  (%s)%s', weaponType, weaponName(), isPorterRiding and '  [MOUNTED]' or ''),
+        isPorterRiding and 0xFF44FF44 or 0xFFAAAAAA)
 
     imgui.spacing()
     if imgui.button('Reset to defaults') then cfg = defaultConfig(); saveConfig() end

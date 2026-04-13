@@ -8,7 +8,8 @@
 --   2. Load a hunt
 --   3. Perform actions manually (dodge, guard, counter, etc.)
 --   4. Watch the history list — each unique Cat/Idx change is logged
---   5. Use discovered IDs in MHW_AutoDodge.lua ACT table
+--   5. Use discovered IDs in MHW_AutoDodge.lua
+--   6. Remove from autorun when done (has per-frame overhead)
 
 local character = nil
 local lastBase  = ""
@@ -17,7 +18,7 @@ local uiBase    = "?"
 local uiSub     = "?"
 
 local MAX_HISTORY = 30
-local history = {}  -- { time, ctrl, cat, idx }
+local history = {}
 
 local function addHistory(ctrl, cat, idx)
     table.insert(history, 1, string.format("[%s] %s  Cat=%d  Idx=%d",
@@ -37,7 +38,6 @@ re.on_pre_application_entry('BeginRendering', function()
     end)
     if not character then return end
 
-    -- Poll BaseActionController
     pcall(function()
         local ctrl = character:call("get_BaseActionController")
         if not ctrl then return end
@@ -54,7 +54,6 @@ re.on_pre_application_entry('BeginRendering', function()
         end
     end)
 
-    -- Poll SubActionController
     pcall(function()
         local ctrl = character:call("get_SubActionController")
         if not ctrl then return end
@@ -90,7 +89,7 @@ re.on_draw_ui(function()
 
         imgui.text(string.format('History (last %d changes):', #history))
         imgui.spacing()
-        for i, entry in ipairs(history) do
+        for _, entry in ipairs(history) do
             local col = entry:find("SUB") and 0xFF44FFFF or 0xFFFFFF44
             imgui.text_colored(entry, col)
         end
