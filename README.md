@@ -8,13 +8,16 @@ More weapons are being added over time based on requests from the [Nexus Mods co
 
 > Requires [REFramework](https://www.nexusmods.com/monsterhunterwilds/mods/4275).
 
+<img width="323" height="166" alt="MonsterHunterWilds_URUtTADvMK" src="https://github.com/user-attachments/assets/d3dad27f-cbbc-48ad-9064-68f1d00f040c" />
+
+---
+<img width="457" height="605" alt="MonsterHunterWilds_IYw1tLAeCc" src="https://github.com/user-attachments/assets/16b17850-225a-48f0-af49-f4ee7df139c8" />
 
 ## Showcase ( **Works with unequipped weapon also!** )
 
-
 [![Watch the video](https://youtu.be/CrHF1qwJr9U)](https://youtu.be/CrHF1qwJr9U)
 
-
+---
 ## Installation
 
 1. Download the latest release.
