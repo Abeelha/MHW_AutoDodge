@@ -360,7 +360,7 @@ re.on_draw_ui(function()
 
     imgui.text('Universal Cooldown')
     imgui.indent(16)
-    c, cfg.universalCooldown = imgui.slider_float('All weapons##uni', cfg.universalCooldown, 0.05, 2.0)
+    c, cfg.universalCooldown = imgui.slider_float('All weapons##uni', cfg.universalCooldown, 0.05, 4.0)
     if c then
         cfg.bowCooldown = cfg.universalCooldown
         cfg.lbgCooldown = cfg.universalCooldown
@@ -385,7 +385,7 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.evadeEnabled = imgui.checkbox('Active##evade', cfg.evadeEnabled)
     changed = changed or c
-    c, cfg.bowCooldown = imgui.slider_float('Cooldown (s)##bow', cfg.bowCooldown, 0.05, 2.0)
+    c, cfg.bowCooldown = imgui.slider_float('Cooldown (s)##bow', cfg.bowCooldown, 0.05, 4.0)
     changed = changed or c
     imgui.unindent(16)
 
@@ -396,7 +396,7 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.lbgEnabled = imgui.checkbox('Active##lbg', cfg.lbgEnabled)
     changed = changed or c
-    c, cfg.lbgCooldown = imgui.slider_float('Cooldown (s)##lbg', cfg.lbgCooldown, 0.05, 2.0)
+    c, cfg.lbgCooldown = imgui.slider_float('Cooldown (s)##lbg', cfg.lbgCooldown, 0.05, 4.0)
     changed = changed or c
     imgui.unindent(16)
 
@@ -410,7 +410,7 @@ re.on_draw_ui(function()
     imgui.begin_disabled(not cfg.guardEnabled)
     c, cfg.hbgOffset = imgui.checkbox('Offset (unchecked = Perfect Guard)##hbg', cfg.hbgOffset)
     changed = changed or c
-    c, cfg.hbgCooldown = imgui.slider_float('Cooldown (s)##hbg', cfg.hbgCooldown, 0.05, 2.0)
+    c, cfg.hbgCooldown = imgui.slider_float('Cooldown (s)##hbg', cfg.hbgCooldown, 0.05, 4.0)
     changed = changed or c
     imgui.end_disabled()
     imgui.unindent(16)
@@ -422,7 +422,7 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.gsEnabled = imgui.checkbox('Active##gs', cfg.gsEnabled)
     changed = changed or c
-    c, cfg.gsCooldown = imgui.slider_float('Cooldown (s)##gs', cfg.gsCooldown, 0.05, 2.0)
+    c, cfg.gsCooldown = imgui.slider_float('Cooldown (s)##gs', cfg.gsCooldown, 0.05, 4.0)
     changed = changed or c
     imgui.unindent(16)
 
@@ -436,7 +436,7 @@ re.on_draw_ui(function()
     imgui.begin_disabled(not cfg.snsEnabled)
     c, cfg.snsGuard = imgui.checkbox('Perfect Guard (unchecked = Dodge)##sns', cfg.snsGuard)
     changed = changed or c
-    c, cfg.snsCooldown = imgui.slider_float('Cooldown (s)##sns', cfg.snsCooldown, 0.05, 2.0)
+    c, cfg.snsCooldown = imgui.slider_float('Cooldown (s)##sns', cfg.snsCooldown, 0.05, 4.0)
     changed = changed or c
     imgui.end_disabled()
     imgui.unindent(16)
@@ -448,7 +448,7 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.dbEnabled = imgui.checkbox('Active##db', cfg.dbEnabled)
     changed = changed or c
-    c, cfg.dbCooldown = imgui.slider_float('Cooldown (s)##db', cfg.dbCooldown, 0.05, 2.0)
+    c, cfg.dbCooldown = imgui.slider_float('Cooldown (s)##db', cfg.dbCooldown, 0.05, 4.0)
     changed = changed or c
     imgui.unindent(16)
 
@@ -462,7 +462,7 @@ re.on_draw_ui(function()
     imgui.begin_disabled(not cfg.cbEnabled)
     c, cfg.cbGuard = imgui.checkbox('Perfect Guard (unchecked = Dodge)##cb', cfg.cbGuard)
     changed = changed or c
-    c, cfg.cbCooldown = imgui.slider_float('Cooldown (s)##cb', cfg.cbCooldown, 0.05, 2.0)
+    c, cfg.cbCooldown = imgui.slider_float('Cooldown (s)##cb', cfg.cbCooldown, 0.05, 4.0)
     changed = changed or c
     imgui.end_disabled()
     imgui.unindent(16)
@@ -474,7 +474,7 @@ re.on_draw_ui(function()
     imgui.indent(16)
     c, cfg.saEnabled = imgui.checkbox('Active##sa', cfg.saEnabled)
     changed = changed or c
-    c, cfg.saCooldown = imgui.slider_float('Cooldown (s)##sa', cfg.saCooldown, 0.05, 2.0)
+    c, cfg.saCooldown = imgui.slider_float('Cooldown (s)##sa', cfg.saCooldown, 0.05, 4.0)
     changed = changed or c
     if weaponType == SA then
         imgui.text_colored(
